@@ -103,8 +103,8 @@ topics:
 | Interface | Destination   | Subnet    | Broadcast   | Address   | Mask |
 | --------- | ------------- | --------- | ----------- | --------- | ---- |
 | eth0      | RouterOutisde | 200.1.1.0 | 200.1.1.255 | 200.1.1.1 | 24   |
-| eth1      | FW2           | 10.0.10.0 | 10.0.10.255 | 10.0.10.1 | 24   |
-| eth2      | FW1           | 10.0.20.0 | 10.0.20.255 | 10.0.20.1 | 24   |
+| eth3      | FW2           | 10.0.10.0 | 10.0.10.255 | 10.0.10.1 | 24   |
+| eth4      | FW1           | 10.0.20.0 | 10.0.20.255 | 10.0.20.1 | 24   |
 | eth5      | LB2B          | 10.0.50.0 | 10.0.50.255 | 10.0.50.1 | 24   |
 
 ## LB2B
@@ -112,8 +112,8 @@ topics:
 | Interface | Destination   | Subnet    | Broadcast   | Address   | Mask |
 | --------- | ------------- | --------- | ----------- | --------- | ---- |
 | eth0      | RouterOutisde | 200.1.1.0 | 200.1.1.255 | 200.1.1.2 | 24   |
-| eth1      | FW1           | 10.0.30.0 | 10.0.30.255 | 10.0.30.2 | 24   |
-| eth2      | FW2           | 10.0.40.0 | 10.0.40.255 | 10.0.40.2 | 24   |
+| eth3      | FW1           | 10.0.30.0 | 10.0.30.255 | 10.0.30.2 | 24   |
+| eth4      | FW2           | 10.0.40.0 | 10.0.40.255 | 10.0.40.2 | 24   |
 | eth5      | LB2B          | 10.0.50.0 | 10.0.50.255 | 10.0.50.2 | 24   |
 
 # FW
@@ -121,8 +121,8 @@ topics:
 
 | Interface | Destination | Subnet    | Broadcast   | Address   | Mask |
 | --------- | ----------- | --------- | ----------- | --------- | ---- |
-| eth0      | LB1A        | 10.0.2.0  | 10.0.2.255  | 10.0.2.3  | 24   |
 | eth1      | LB1B        | 10.0.3.0  | 10.0.3.255  | 10.0.3.3  | 24   |
+| eth2      | LB1A        | 10.0.2.0  | 10.0.2.255  | 10.0.2.3  | 24   |
 | eth3      | LB2B        | 10.0.30.0 | 10.0.30.255 | 10.0.30.3 | 24   |
 | eth4      | LB2A        | 10.0.20.0 | 10.0.20.255 | 10.0.20.3 | 24   |
 
@@ -130,8 +130,8 @@ topics:
 
 | Interface | Destination | Subnet    | Broadcast   | Address   | Mask |
 | --------- | ----------- | --------- | ----------- | --------- | ---- |
-| eth0      | LB1B        | 10.0.4.0  | 10.0.4.255  | 10.0.4.4  | 24   |
 | eth1      | LB1A        | 10.0.1.0  | 10.0.1.255  | 10.0.1.4  | 24   |
+| eth2      | LB1B        | 10.0.4.0  | 10.0.4.255  | 10.0.4.4  | 24   |
 | eth3      | LB2A        | 10.0.10.0 | 10.0.10.255 | 10.0.10.4 | 24   |
 | eth4      | LB2B        | 10.0.40.0 | 10.0.40.255 | 10.0.40.4 | 24   |
 
@@ -268,8 +268,8 @@ configure
 
 set system host-name LB2A
 set interfaces ethernet eth0 address 200.1.1.1/24
-set interfaces ethernet eth1 address 10.0.10.1/24
-set interfaces ethernet eth2 address 10.0.20.1/24
+set interfaces ethernet eth3 address 10.0.10.1/24
+set interfaces ethernet eth4 address 10.0.20.1/24
 set interfaces ethernet eth5 address 10.0.50.1/24
 
 commit
@@ -293,8 +293,8 @@ configure
 
 set system host-name LB2B
 set interfaces ethernet eth0 address 200.1.1.2/24
-set interfaces ethernet eth1 address 10.0.30.2/24
-set interfaces ethernet eth2 address 10.0.40.2/24
+set interfaces ethernet eth3 address 10.0.30.2/24
+set interfaces ethernet eth4 address 10.0.40.2/24
 set interfaces ethernet eth5 address 10.0.50.2/24
 
 commit
@@ -317,8 +317,8 @@ exit
 configure
 
 set system host-name FW1
-set interfaces ethernet eth0 address 10.0.2.3/24
 set interfaces ethernet eth1 address 10.0.3.3/24
+set interfaces ethernet eth2 address 10.0.2.3/24
 set interfaces ethernet eth3 address 10.0.30.3/24
 set interfaces ethernet eth4 address 10.0.20.3/24
 
@@ -340,6 +340,7 @@ commit
 save
 exit
 
+################################################
 # nat pat config
 configure
 
@@ -360,8 +361,8 @@ exit
 configure
 
 set system host-name FW2
-set interfaces ethernet eth0 address 10.0.4.4/24
 set interfaces ethernet eth1 address 10.0.1.4/24
+set interfaces ethernet eth2 address 10.0.4.4/24
 set interfaces ethernet eth3 address 10.0.10.4/24
 set interfaces ethernet eth4 address 10.0.40.4/24
 
@@ -382,6 +383,7 @@ commit
 save
 exit
 
+##########################
 # nat pat config
 configure
 
