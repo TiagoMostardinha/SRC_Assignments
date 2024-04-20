@@ -19,13 +19,14 @@ topics:
 ---
 # Requirements
 - Build and configure a network with firewall and load-balancers
-	- [ ] VPCS address config
-	- [ ] Router config
-		- [ ] address config
-		- [ ] static routes config
+	- [x] VPCS address config
+	- [x] Router config
+		- [x] address config
+		- [x] static routes config
 	- [ ] Firewall
-		- [ ] interfaces addres config
-		- [ ] NAT/PAT config
+		- [x] interfaces addres config
+		- [x] static ip route
+		- [x] NAT/PAT config
 		- [ ] Zone configuration
 		- [ ] Firewall chains and rules
 			- [ ] Firewall chains
@@ -33,11 +34,11 @@ topics:
 			- [ ] UDP port blockage
 			- [ ] public access control config
 			- [ ] Block external users during a DDoS
-	- [ ] Load-Balancer configuration
-		- [ ] interfaces address config
-		- [ ] static route config
-		- [ ] VRRP config
-		- [ ] connection synchronization states config
+	- [x] Load-Balancer configuration
+		- [x] interfaces address config
+		- [x] static route config
+		- [x] VRRP config
+		- [x] connection synchronization states config
 
 - **Questions**
 	1. Explain why the synchronization of the load-balancers allows the nonexistence of firewall synchronization.
@@ -55,7 +56,20 @@ topics:
 1. 
 ---
 # Map of Content
-1. 
+1. VPC
+	1. [[#Inside - config | VPC Inside]]
+	2. [[#Outside - config | VPC Outside]]
+2. Router
+	1. [[#RouterInside - config|Router Inside]]
+	2. [[#RouterOutside - config|Router Outside]]
+3. LB
+	1. [[#LB1A - config | LB1A]]
+	2. [[#LB1B - config | LB1B]]
+	3. [[#LB2A - config | LB2A]]
+	4. [[#LB2B - config | LB2B]]
+4. FW
+	1. [[#FW1 - config | FW1]]
+	2. [[#FW2 - config | FW2]]
 ---
 # Network
 ## PC
@@ -233,6 +247,48 @@ set protocols static route 10.2.2.0/24 next-hop 10.1.1.10
 commit
 save
 exit
+
+# vrrp config
+configure
+
+set high-availability vrrp group LB1Cluster vrid 10
+set high-availability vrrp group LB1Cluster interface eth5
+set high-availability vrrp group LB1Cluster virtual-address 192.168.100.1/24
+set high-availability vrrp sync-group LB1Cluster member LB1Cluster
+set high-availability vrrp group LB1Cluster rfc3768-compatibility
+
+commit
+save
+exit
+
+# connection state synchronization config
+configure
+
+set service conntrack-sync accept-protocol 'tcp,udp,icmp'
+set service conntrack-sync failover-mechanism vrrp sync-group LB1Cluster
+set service conntrack-sync interface eth5
+set service conntrack-sync mcast-group 225.0.0.50
+set service conntrack-sync disable-external-cache
+
+commit
+save
+exit
+
+# load balancing config
+configure
+
+set load-balancing wan interface-health eth1 nexthop 10.0.1.4
+set load-balancing wan interface-health eth2 nexthop 10.0.2.3
+set load-balancing wan rule 1 inbound-interface eth0
+set load-balancing wan rule 1 interface eth1 weight 1
+set load-balancing wan rule 1 interface eth2 weight 1
+set load-balancing wan sticky-connections inbound
+set load-balancing wan disable-source-nat
+
+commit
+save
+exit
+
 ```
 
 ## LB1B - config
@@ -258,6 +314,48 @@ set protocols static route 10.2.2.0/24 next-hop 10.1.1.10
 commit
 save
 exit
+
+# vrrp config
+configure
+
+set high-availability vrrp group LB1Cluster vrid 10
+set high-availability vrrp group LB1Cluster interface eth5
+set high-availability vrrp group LB1Cluster virtual-address 192.168.100.1/24
+set high-availability vrrp sync-group LB1Cluster member LB1Cluster
+set high-availability vrrp group LB1Cluster rfc3768-compatibility
+
+commit
+save
+exit
+
+# connection state synchronization config
+configure
+
+set service conntrack-sync accept-protocol 'tcp,udp,icmp'
+set service conntrack-sync failover-mechanism vrrp sync-group LB1Cluster
+set service conntrack-sync interface eth5
+set service conntrack-sync mcast-group 225.0.0.50
+set service conntrack-sync disable-external-cache
+
+commit
+save
+exit
+
+# load balancing config
+configure
+
+set load-balancing wan interface-health eth1 nexthop 10.0.3.3
+set load-balancing wan interface-health eth2 nexthop 10.0.4.4
+set load-balancing wan rule 1 inbound-interface eth0
+set load-balancing wan rule 1 interface eth1 weight 1
+set load-balancing wan rule 1 interface eth2 weight 1
+set load-balancing wan sticky-connections inbound
+set load-balancing wan disable-source-nat
+
+commit
+save
+exit
+
 ```
 
 
@@ -284,6 +382,111 @@ set protocols static route 200.2.2.0/24 next-hop 200.1.1.10
 commit
 save
 exit
+
+# vrrp config
+configure
+
+set high-availability vrrp group LB2Cluster vrid 10
+set high-availability vrrp group LB2Cluster interface eth5
+set high-availability vrrp group LB2Cluster virtual-address 192.168.200.1/24
+set high-availability vrrp sync-group LB2Cluster member LB2Cluster
+set high-availability vrrp group LB2Cluster rfc3768-compatibility
+
+commit
+save
+exit
+
+
+
+# connection state synchronization config
+configure
+
+set service conntrack-sync accept-protocol 'tcp,udp,icmp'
+set service conntrack-sync failover-mechanism vrrp sync-group LB2Cluster
+set service conntrack-sync interface eth5
+set service conntrack-sync mcast-group 225.0.0.100
+set service conntrack-sync disable-external-cache
+
+commit
+save
+exit
+
+# load balancing config
+configure
+# interfaces config
+configure
+
+set system host-name LB2B
+set interfaces ethernet eth0 address 200.1.1.2/24
+set interfaces ethernet eth3 address 10.0.30.2/24
+set interfaces ethernet eth4 address 10.0.40.2/24
+set interfaces ethernet eth5 address 10.0.50.2/24
+
+commit
+save
+exit
+
+# static ip route
+configure
+
+set protocols static route 200.2.2.0/24 next-hop 200.1.1.10
+
+commit
+save
+exit
+
+# vrrp config
+configure
+
+set high-availability vrrp group LB2Cluster vrid 10
+set high-availability vrrp group LB2Cluster interface eth5
+set high-availability vrrp group LB2Cluster virtual-address 192.168.200.1/24
+set high-availability vrrp sync-group LB2Cluster member LB2Cluster
+set high-availability vrrp group LB2Cluster rfc3768-compatibility
+
+commit
+save
+exit
+
+# connection state synchronization config
+configure
+
+set service conntrack-sync accept-protocol 'tcp,udp,icmp'
+set service conntrack-sync failover-mechanism vrrp sync-group LB2Cluster
+set service conntrack-sync interface eth5
+set service conntrack-sync mcast-group 225.0.0.100
+set service conntrack-sync disable-external-cache
+
+commit
+save
+exit
+
+# load balancing config
+configure
+
+set load-balancing wan interface-health eth3 nexthop 10.0.30.3
+set load-balancing wan interface-health eth4 nexthop 10.0.40.4
+set load-balancing wan rule 1 inbound-interface eth0
+set load-balancing wan rule 1 interface eth3 weight 1
+set load-balancing wan rule 1 interface eth4 weight 1
+set load-balancing wan sticky-connections inbound
+set load-balancing wan disable-source-nat
+
+commit
+save
+exit 
+set load-balancing wan interface-health eth3 nexthop 10.0.10.4
+set load-balancing wan interface-health eth4 nexthop 10.0.20.3
+set load-balancing wan rule 1 inbound-interface eth0
+set load-balancing wan rule 1 interface eth3 weight 1
+set load-balancing wan rule 1 interface eth4 weight 1
+set load-balancing wan sticky-connections inbound
+set load-balancing wan disable-source-nat
+
+commit
+save
+exit
+
 ```
 
 ## LB2B - config
@@ -309,6 +512,48 @@ set protocols static route 200.2.2.0/24 next-hop 200.1.1.10
 commit
 save
 exit
+
+# vrrp config
+configure
+
+set high-availability vrrp group LB2Cluster vrid 10
+set high-availability vrrp group LB2Cluster interface eth5
+set high-availability vrrp group LB2Cluster virtual-address 192.168.200.1/24
+set high-availability vrrp sync-group LB2Cluster member LB2Cluster
+set high-availability vrrp group LB2Cluster rfc3768-compatibility
+
+commit
+save
+exit
+
+# connection state synchronization config
+configure
+
+set service conntrack-sync accept-protocol 'tcp,udp,icmp'
+set service conntrack-sync failover-mechanism vrrp sync-group LB2Cluster
+set service conntrack-sync interface eth5
+set service conntrack-sync mcast-group 225.0.0.100
+set service conntrack-sync disable-external-cache
+
+commit
+save
+exit
+
+# load balancing config
+configure
+
+set load-balancing wan interface-health eth3 nexthop 10.0.30.3
+set load-balancing wan interface-health eth4 nexthop 10.0.40.4
+set load-balancing wan rule 1 inbound-interface eth0
+set load-balancing wan rule 1 interface eth3 weight 1
+set load-balancing wan rule 1 interface eth4 weight 1
+set load-balancing wan sticky-connections inbound
+set load-balancing wan disable-source-nat
+
+commit
+save
+exit
+
 ```
 
 ## FW1 - config
@@ -340,7 +585,6 @@ commit
 save
 exit
 
-################################################
 # nat pat config
 configure
 
@@ -350,7 +594,7 @@ set nat source rule 10 source address 10.0.0.0/8
 set nat source rule 10 translation address 192.1.0.1-192.1.0.10
 
 commit
-#save
+save
 exit
 
 ```
@@ -383,7 +627,6 @@ commit
 save
 exit
 
-##########################
 # nat pat config
 configure
 
@@ -393,7 +636,7 @@ set nat source rule 10 source address 10.0.0.0/8
 set nat source rule 10 translation address 192.1.0.1-192.1.0.10
 
 commit
-#save
+save
 exit
 
 ```
