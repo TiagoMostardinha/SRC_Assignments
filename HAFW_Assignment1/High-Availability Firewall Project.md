@@ -413,68 +413,8 @@ exit
 
 # load balancing config
 configure
-# interfaces config
 configure
 
-set system host-name LB2B
-set interfaces ethernet eth0 address 200.1.1.2/24
-set interfaces ethernet eth3 address 10.0.30.2/24
-set interfaces ethernet eth4 address 10.0.40.2/24
-set interfaces ethernet eth5 address 10.0.50.2/24
-
-commit
-save
-exit
-
-# static ip route
-configure
-
-set protocols static route 200.2.2.0/24 next-hop 200.1.1.10
-
-commit
-save
-exit
-
-# vrrp config
-configure
-
-set high-availability vrrp group LB2Cluster vrid 10
-set high-availability vrrp group LB2Cluster interface eth5
-set high-availability vrrp group LB2Cluster virtual-address 192.168.200.1/24
-set high-availability vrrp sync-group LB2Cluster member LB2Cluster
-set high-availability vrrp group LB2Cluster rfc3768-compatibility
-
-commit
-save
-exit
-
-# connection state synchronization config
-configure
-
-set service conntrack-sync accept-protocol 'tcp,udp,icmp'
-set service conntrack-sync failover-mechanism vrrp sync-group LB2Cluster
-set service conntrack-sync interface eth5
-set service conntrack-sync mcast-group 225.0.0.100
-set service conntrack-sync disable-external-cache
-
-commit
-save
-exit
-
-# load balancing config
-configure
-
-set load-balancing wan interface-health eth3 nexthop 10.0.30.3
-set load-balancing wan interface-health eth4 nexthop 10.0.40.4
-set load-balancing wan rule 1 inbound-interface eth0
-set load-balancing wan rule 1 interface eth3 weight 1
-set load-balancing wan rule 1 interface eth4 weight 1
-set load-balancing wan sticky-connections inbound
-set load-balancing wan disable-source-nat
-
-commit
-save
-exit 
 set load-balancing wan interface-health eth3 nexthop 10.0.10.4
 set load-balancing wan interface-health eth4 nexthop 10.0.20.3
 set load-balancing wan rule 1 inbound-interface eth0
